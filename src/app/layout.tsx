@@ -9,7 +9,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "ProkerMart | Pusat Belanja Organisasi Mahasiswa",
-  description: "Marketplace terpadu yang menyatukan seluruh aktivitas komersial organisasi kampus dalam satu ekosistem digital.",
+  description:
+    "Marketplace terpadu yang menyatukan seluruh aktivitas komersial organisasi kampus dalam satu ekosistem digital.",
 };
 
 export default function RootLayout({
@@ -18,11 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="id"
-      className={`${inter.variable} antialiased`}
-    >
-      <body className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">{children}</body>
+    <html lang="id" className={`${inter.variable} antialiased`}>
+      <body className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+        {children}
+      </body>
     </html>
   );
 }

@@ -13,12 +13,12 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
+          <div className="shrink-0 flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">P</span>
               </div>
-              <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-secondary-600">
+              <span className="font-bold text-xl bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-secondary-600">
                 ProkerMart
               </span>
             </Link>
@@ -26,10 +26,16 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/explore" className="text-slate-600 hover:text-primary-600 font-medium transition-colors">
+            <Link
+              href="/explore"
+              className="text-slate-600 hover:text-primary-600 font-medium transition-colors"
+            >
               Eksplor
             </Link>
-            <Link href="/organizations" className="text-slate-600 hover:text-primary-600 font-medium transition-colors">
+            <Link
+              href="/organizations"
+              className="text-slate-600 hover:text-primary-600 font-medium transition-colors"
+            >
               Organisasi
             </Link>
           </div>
@@ -46,7 +52,10 @@ export function Navbar() {
               </span>
             </button>
             <div className="h-6 w-px bg-slate-300 mx-2"></div>
-            <Link href="/login" className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors">
+            <Link
+              href="/login"
+              className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors"
+            >
               <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
                 <User className="w-4 h-4" />
               </div>
@@ -76,10 +85,16 @@ export function Navbar() {
             className="md:hidden border-t border-slate-200 bg-white"
           >
             <div className="px-4 pt-2 pb-4 space-y-1">
-              <Link href="/explore" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50">
+              <Link
+                href="/explore"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50"
+              >
                 Eksplor
               </Link>
-              <Link href="/organizations" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50">
+              <Link
+                href="/organizations"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50"
+              >
                 Organisasi
               </Link>
             </div>
