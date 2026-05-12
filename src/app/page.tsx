@@ -30,13 +30,13 @@ export default function Home() {
                   <span className="flex h-2 w-2 rounded-full bg-primary-600"></span>
                   Platform Resmi Organisasi Mahasiswa
                 </span>
-                <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8">
+                <h1 className="text-5xl md:text-7xl font-extrabold text-slate-100 tracking-tight mb-8">
                   Dukung Proker Kampus, <br className="hidden md:block" />
-                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-600 to-secondary-600">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-500 to-secondary-500">
                     Lebih Mudah & Modern
                   </span>
                 </h1>
-                <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-2xl mx-auto">
                   ProkerMart adalah ekosistem digital terpadu untuk jual-beli
                   program kerja mahasiswa. Temukan merchandise, makanan, dan
                   layanan dari berbagai organisasi dalam satu platform.

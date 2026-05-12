@@ -108,7 +108,7 @@ export default function ExplorePage() {
       <div className="bg-white border-b border-slate-200 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-            <div className="w-full md:w-2/3 relative">
+            <div className="w-full relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400" />
               </div>
@@ -151,9 +151,7 @@ export default function ExplorePage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="mb-6 flex justify-between items-end">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Eksplor Produk
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900">Produk</h1>
             <p className="text-slate-500">
               Menampilkan {filteredProducts.length} produk dari berbagai proker.
             </p>

@@ -84,13 +84,9 @@ export default function LoginPage() {
                 className="bg-white rounded-3xl p-8 border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col relative overflow-hidden"
               >
                 {/* Decorative top gradient */}
-                <div
-                  className={`absolute top-0 left-0 w-full h-2 bg-linear-to-r ${role.color}`}
-                ></div>
-
-                <div
-                  className={`w-16 h-16 rounded-2xl ${role.bgColor} ${role.textColor} flex items-center justify-center mb-6`}
-                >
+                <div className={`absolute top-0 left-0 w-full h-2 bg-linear-to-r ${role.color}`}></div>
+                
+                <div className={`w-16 h-16 rounded-2xl ${role.bgColor} ${role.textColor} flex items-center justify-center mb-6`}>
                   <Icon className="w-8 h-8" />
                 </div>
 
@@ -107,13 +103,8 @@ export default function LoginPage() {
                   </h3>
                   <ul className="space-y-2">
                     {role.features.map((feature, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-center gap-2 text-sm text-slate-600"
-                      >
-                        <div
-                          className={`w-1.5 h-1.5 rounded-full bg-linear-to-r ${role.color}`}
-                        ></div>
+                      <li key={idx} className="flex items-center gap-2 text-sm text-slate-600">
+                        <div className={`w-1.5 h-1.5 rounded-full bg-linear-to-r ${role.color}`}></div>
                         {feature}
                       </li>
                     ))}

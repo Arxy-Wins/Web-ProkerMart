@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function DashboardLayout({
   children,
@@ -33,12 +34,7 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-linear-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
-            <span className="font-bold text-xl text-slate-900">ProkerMart</span>
-          </Link>
+          <Logo />
         </div>
 
         <div className="flex-1 overflow-y-auto py-6 px-4">
