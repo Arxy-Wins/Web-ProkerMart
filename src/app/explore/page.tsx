@@ -106,8 +106,8 @@ export default function ExplorePage() {
 
       {/* Header Search Section */}
       <div className="bg-white border-b border-slate-200 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex gap-2">
             <div className="w-full relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400" />
@@ -120,42 +120,48 @@ export default function ExplorePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="w-full md:w-auto flex gap-2">
-              <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors">
-                <Filter className="w-5 h-5" />
-                Filter
-              </button>
-            </div>
+            <button className="flex px-4 py-2 items-center justify-center rounded-xl text-sm font-medium whitespace-nowrap transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200">
+              <Filter className="w-5 h-5" />
+            </button>
           </div>
+          <div className="flex items-start mt-4 gap-2">
+            <Link
+              href="/explore/nearby"
+              className="flex px-4 py-2 items-center justify-center rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-primary-100 text-primary-600 hover:bg-primary-200 gap-2"
+            >
+              <MapPin className="w-4 h-4" /> Sekitarmu
+            </Link>
+            <div className="border-r-2 border-slate-200 h-8"></div>
 
-          {/* Categories */}
-          <div className="flex overflow-x-auto gap-2 mt-6 pb-2 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeCategory === cat
-                    ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            {/* Categories */}
+            <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    activeCategory === cat
+                      ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Product List */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div className="mb-6 flex justify-between items-end">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full">
+        <div className="mb-4 flex justify-between items-end">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">
               Eksplor Produk
             </h1>
             <p className="text-slate-500">
-              Menampilkan {filteredProducts.length} produk dari berbagai proker.
+              Menampilkan produk dari berbagai proker.
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-sm text-slate-600">

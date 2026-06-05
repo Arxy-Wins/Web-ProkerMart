@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Ticket, Search, Clock } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { UserSidebar } from "@/components/user/UserSidebar";
