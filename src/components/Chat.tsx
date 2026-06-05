@@ -146,7 +146,7 @@ export function Chat() {
       {/* Floating Toggle Button (Desktop Only) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden md:flex fixed bottom-8 right-8 w-14 h-14 bg-primary-600 text-white rounded-full shadow-2xl items-center justify-center hover:bg-primary-700 hover:scale-105 active:scale-95 transition-all z-100 group"
+        className="hidden md:flex fixed bottom-12 right-8 w-14 h-14 bg-primary-600 text-white rounded-full shadow-2xl items-center justify-center hover:bg-primary-700 hover:scale-105 active:scale-95 transition-all z-100 group"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (

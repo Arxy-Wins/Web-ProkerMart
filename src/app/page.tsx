@@ -15,8 +15,8 @@ export default function Home() {
           {/* Background Decorations */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200 dark:bg-primary-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob"></div>
-            <div className="absolute top-24 -left-24 w-96 h-96 bg-secondary-200 dark:bg-secondary-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-purple-200 dark:bg-purple-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob animation-delay-4000"></div>
+            <div className="absolute top-24 -left-24 w-96 h-96 bg-blue-200 dark:bg-blue-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-blue-200 dark:bg-blue-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob animation-delay-4000"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -32,7 +32,7 @@ export default function Home() {
                 </span>
                 <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 transition-colors">
                   Dukung Proker Kampus, <br className="hidden md:block" />
-                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-500 to-secondary-500">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-500 to-blue-500">
                     Lebih Mudah & Modern
                   </span>
                 </h1>
@@ -84,7 +84,7 @@ export default function Home() {
                 },
                 {
                   icon: (
-                    <Zap className="w-8 h-8 text-secondary-500 dark:text-secondary-400" />
+                    <Zap className="w-8 h-8 text-indigo-500 dark:text-indigo-400" />
                   ),
                   title: "Transaksi Digital Real-time",
                   desc: "Pembayaran QRIS dan transfer bank. Tidak ada lagi pencatatan manual yang rawan kesalahan.",
@@ -229,7 +229,7 @@ export default function Home() {
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex justify-center items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-linear-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-linear-to-br from-primary-500 to-blue-500 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-xl">P</span>
             </div>
             <span className="font-bold text-xl text-slate-900 dark:text-white transition-colors">

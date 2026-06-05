@@ -170,8 +170,10 @@ export default function UserDashboardPage() {
                         23
                       </span>
                     </Link>
-                    <button 
-                      onClick={() => window.dispatchEvent(new CustomEvent("openProkerChat"))}
+                    <button
+                      onClick={() =>
+                        window.dispatchEvent(new CustomEvent("openProkerChat"))
+                      }
                       className="relative"
                     >
                       <MessageSquare className="w-6 h-6" />

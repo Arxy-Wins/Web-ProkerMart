@@ -120,7 +120,6 @@ export function Navbar({ variant = "default" }: NavbarProps) {
                 2
               </span>
             </Link>
-            <div className="h-6 w-px bg-slate-300 mx-2"></div>
 
             {/* Profile Dropdown */}
             <div
