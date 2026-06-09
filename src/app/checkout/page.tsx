@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import {
@@ -13,6 +13,11 @@ import {
   CheckCircle,
   ShoppingBag,
   Copy,
+  AlertCircle,
+  Navigation,
+  Map,
+  Search,
+  Loader2,
 } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -24,11 +29,70 @@ export default function CheckoutPage() {
   
   // Pick Up States
   const [pickupTime, setPickupTime] = useState("");
+  const [newAddressDetail, setNewAddressDetail] = useState("");
+  const [showPaymentAlert, setShowPaymentAlert] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   
   // States for Notifications/Modals
   const [showToast, setShowToast] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentGatewayState, setPaymentGatewayState] = useState<"loading" | "qris" | "transfer" | null>(null);
+
+  const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID" | "EXPIRED">("PENDING");
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [isCheckingManual, setIsCheckingManual] = useState(false);
+
+  // Logic Hooks
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showPaymentModal && paymentGatewayState && paymentGatewayState !== "loading" && paymentStatus === "PENDING") {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setPaymentStatus("EXPIRED");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showPaymentModal, paymentGatewayState, paymentStatus]);
+
+  useEffect(() => {
+    let webhookTimer: NodeJS.Timeout;
+    if (showPaymentModal && paymentGatewayState && paymentGatewayState !== "loading" && paymentStatus === "PENDING") {
+      webhookTimer = setTimeout(() => {
+        setPaymentStatus("PAID");
+      }, 7000);
+    }
+    return () => clearTimeout(webhookTimer);
+  }, [showPaymentModal, paymentGatewayState, paymentStatus]);
+
+  useEffect(() => {
+    let redirectTimer: NodeJS.Timeout;
+    if (paymentStatus === "PAID") {
+      redirectTimer = setTimeout(() => {
+        setShowPaymentModal(false);
+        router.push("/user/purchase");
+      }, 5000);
+    }
+    return () => clearTimeout(redirectTimer);
+  }, [paymentStatus, router]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const handleManualCheck = () => {
+    setIsCheckingManual(true);
+    setTimeout(() => {
+      setIsCheckingManual(false);
+      alert("Pembayaran belum terdeteksi. Silakan coba lagi.");
+    }, 1500);
+  };
 
   // Dummy Product Data
   const dummyProduct = {
@@ -37,6 +101,23 @@ export default function CheckoutPage() {
     price: 15000,
     quantity: 1,
     imagePlaceholder: true
+  };
+
+  const handleCurrentLocation = () => {
+    setIsDetectingLocation(true);
+    setTimeout(() => {
+      setNewAddressDetail("Jl. Raya Kampus Unud, Jimbaran, Kec. Kuta Sel., Kabupaten Badung, Bali 80361");
+      setIsDetectingLocation(false);
+    }, 1500);
+  };
+
+  const handlePaymentSelect = (method: "qris" | "transfer" | "cod") => {
+    if (!deliveryMethod) {
+      setShowPaymentAlert(true);
+      return;
+    }
+    setShowPaymentAlert(false);
+    setPaymentMethod(method);
   };
 
   const handleCheckout = () => {
@@ -49,6 +130,9 @@ export default function CheckoutPage() {
       }, 2000);
     } else {
       setPaymentGatewayState("loading");
+      setPaymentStatus("PENDING");
+      setTimeLeft(300);
+      setIsCheckingManual(false);
       setShowPaymentModal(true);
       
       // Simulasi loading 1.5 detik, lalu munculkan QRIS/VA
@@ -56,11 +140,6 @@ export default function CheckoutPage() {
         setPaymentGatewayState(paymentMethod === "qris" ? "qris" : "transfer");
       }, 1500);
     }
-  };
-
-  const handleFinishPayment = () => {
-    setShowPaymentModal(false);
-    router.push("/user/purchase");
   };
 
   return (
@@ -148,6 +227,9 @@ export default function CheckoutPage() {
                     <option value="12:00 - 14:00">12:00 - 14:00 WITA</option>
                     <option value="15:00 - 17:00">15:00 - 17:00 WITA</option>
                   </select>
+                  {deliveryMethod === "pickup" && pickupTime === "" && (
+                    <p className="text-red-500 text-xs mt-1.5">* Wajib memilih jam pengambilan</p>
+                  )}
                 </div>
               </div>
             )}
@@ -182,13 +264,71 @@ export default function CheckoutPage() {
                       </button>
                     </div>
                     <div className="space-y-3">
+                      {/* Gunakan Lokasi Saat Ini Button */}
+                      <button 
+                        onClick={handleCurrentLocation}
+                        disabled={isDetectingLocation}
+                        className="w-full flex items-center justify-center gap-2 bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm font-semibold text-blue-600 hover:bg-slate-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
+                      >
+                        {isDetectingLocation ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Mendeteksi lokasi...
+                          </>
+                        ) : (
+                          <>
+                            <Navigation className="w-4 h-4" />
+                            Gunakan Lokasi Saat Ini
+                          </>
+                        )}
+                      </button>
+
+                      {/* Atau Divider */}
+                      <div className="flex items-center gap-3 py-1">
+                        <div className="h-[1px] bg-slate-200 flex-1"></div>
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Atau</span>
+                        <div className="h-[1px] bg-slate-200 flex-1"></div>
+                      </div>
+
+                      {/* Input Cari Alamat Peta */}
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Search className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <input
+                          type="text"
+                          className="w-full border border-slate-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                          placeholder="Cari alamat menggunakan peta..."
+                        />
+                      </div>
+
+                      {/* Peta Google Maps Mockup */}
+                      <div className="w-full h-40 md:h-48 bg-slate-100 rounded-xl border border-slate-300 flex flex-col items-center justify-center text-slate-400 overflow-hidden relative">
+                        <Map className="w-12 h-12 mb-2 opacity-50" />
+                        <span className="text-xs font-medium px-4 text-center">Peta Google Maps akan dirender di sini</span>
+                        
+                        {/* Dummy map elements for visuals */}
+                        <div className="absolute top-2 right-2 flex flex-col gap-1">
+                          <div className="w-6 h-6 bg-white rounded shadow flex items-center justify-center text-[10px] font-bold text-slate-500">+</div>
+                          <div className="w-6 h-6 bg-white rounded shadow flex items-center justify-center text-[10px] font-bold text-slate-500">-</div>
+                        </div>
+                      </div>
+
                       <div>
-                        <label className="text-xs font-medium text-slate-600 block mb-1">Nama Tempat (Opsional)</label>
+                        <label className="text-xs font-medium text-slate-600 block mb-1 mt-2">Nama Tempat (Opsional)</label>
                         <input type="text" placeholder="Contoh: Kos Putra Jaya" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                       </div>
                       <div>
                         <label className="text-xs font-medium text-slate-600 block mb-1">Detail Alamat Lengkap *</label>
-                        <textarea placeholder="Nama jalan, nomor rumah/kamar, patokan..." className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20" />
+                        <textarea 
+                          placeholder="Nama jalan, nomor rumah/kamar, patokan..." 
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20"
+                          value={newAddressDetail}
+                          onChange={(e) => setNewAddressDetail(e.target.value)}
+                        />
+                        {deliveryMethod === "delivery" && !hasSavedAddress && newAddressDetail.trim() === "" && (
+                          <p className="text-red-500 text-xs mt-1.5">* Detail alamat lengkap wajib diisi untuk pengiriman</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -228,7 +368,7 @@ export default function CheckoutPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div 
-                onClick={() => setPaymentMethod("qris")}
+                onClick={() => handlePaymentSelect("qris")}
                 className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center gap-2 transition-all text-center ${
                   paymentMethod === "qris" ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-blue-300"
                 }`}
@@ -238,7 +378,7 @@ export default function CheckoutPage() {
               </div>
               
               <div 
-                onClick={() => setPaymentMethod("transfer")}
+                onClick={() => handlePaymentSelect("transfer")}
                 className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center gap-2 transition-all text-center ${
                   paymentMethod === "transfer" ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-blue-300"
                 }`}
@@ -248,7 +388,7 @@ export default function CheckoutPage() {
               </div>
 
               <div 
-                onClick={() => setPaymentMethod("cod")}
+                onClick={() => handlePaymentSelect("cod")}
                 className={`cursor-pointer rounded-xl border p-3 flex flex-col items-center justify-center gap-2 transition-all text-center ${
                   paymentMethod === "cod" ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-blue-300"
                 }`}
@@ -257,6 +397,12 @@ export default function CheckoutPage() {
                 <span className={`text-sm font-semibold ${paymentMethod === "cod" ? "text-blue-900" : "text-slate-600"}`}>COD (Tunai)</span>
               </div>
             </div>
+
+            {showPaymentAlert && (
+              <div className="text-red-500 text-sm mt-3 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4"/> Tolong pilih metode pengambilan terlebih dahulu.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -294,20 +440,42 @@ export default function CheckoutPage() {
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-in fade-in p-4">
           <div className="bg-white rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
-            {paymentGatewayState === "loading" && (
+            {paymentStatus === "PAID" ? (
+              <div className="flex flex-col items-center py-4">
+                <CheckCircle className="w-16 h-16 text-emerald-500 mb-4 animate-bounce" />
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Pembayaran Berhasil</h3>
+                <p className="text-sm text-slate-500 mb-4">Terima kasih, pesanan Anda sedang diproses.</p>
+                <p className="text-xs text-slate-400">Mengarahkan ke halaman pesanan otomatis...</p>
+              </div>
+            ) : paymentStatus === "EXPIRED" ? (
+              <div className="flex flex-col items-center py-4">
+                <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl font-bold">!</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Pembayaran Kedaluwarsa</h3>
+                <p className="text-sm text-slate-500 mb-6">Waktu pembayaran telah habis. Silakan ulangi proses checkout.</p>
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="w-full bg-slate-800 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-900 transition-all shadow-sm"
+                >
+                  Tutup
+                </button>
+              </div>
+            ) : paymentGatewayState === "loading" ? (
               <>
                 <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
                 <h3 className="text-lg font-bold text-slate-800 mb-2">Memproses Pembayaran</h3>
                 <p className="text-sm text-slate-500">Mohon tunggu sebentar, kami sedang menyiapkan gateway pembayaran...</p>
               </>
-            )}
-
-            {paymentGatewayState === "qris" && (
+            ) : paymentGatewayState === "qris" ? (
               <>
                 <h3 className="text-xl font-bold text-slate-800 mb-1">Pembayaran QRIS</h3>
-                <p className="text-sm text-slate-500 mb-6">Scan QR Code di bawah ini menggunakan aplikasi e-wallet atau m-banking Anda.</p>
+                <div className="flex justify-between w-full mt-2 mb-4 bg-red-50 text-red-600 px-3 py-2 rounded-lg font-semibold border border-red-100 text-sm">
+                  <span>Sisa Waktu</span>
+                  <span className="font-mono">{formatTime(timeLeft)}</span>
+                </div>
                 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
                   {/* Simulasi Gambar QR Code */}
                   <div className="w-48 h-48 bg-white border border-slate-300 rounded-lg flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-2 border-4 border-slate-800 rounded-md"></div>
@@ -319,20 +487,22 @@ export default function CheckoutPage() {
                 </div>
 
                 <button
-                  onClick={handleFinishPayment}
-                  className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-sm"
+                  onClick={handleManualCheck}
+                  disabled={isCheckingManual}
+                  className="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-3 px-4 rounded-xl hover:bg-blue-50 active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm leading-tight"
                 >
-                  Saya Sudah Bayar
+                  {isCheckingManual ? "Mengecek..." : "Klik ini jika pembayaran belum dinyatakan selesai"}
                 </button>
               </>
-            )}
-
-            {paymentGatewayState === "transfer" && (
+            ) : paymentGatewayState === "transfer" ? (
               <>
                 <h3 className="text-xl font-bold text-slate-800 mb-1">Transfer Virtual Account</h3>
-                <p className="text-sm text-slate-500 mb-6">Lakukan transfer ke nomor Virtual Account di bawah ini.</p>
+                <div className="flex justify-between w-full mt-2 mb-4 bg-red-50 text-red-600 px-3 py-2 rounded-lg font-semibold border border-red-100 text-sm">
+                  <span>Sisa Waktu</span>
+                  <span className="font-mono">{formatTime(timeLeft)}</span>
+                </div>
                 
-                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6 w-full text-left">
+                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-4 w-full text-left">
                   <p className="text-xs text-slate-500 mb-1 font-semibold">Bank Tujuan</p>
                   <p className="text-sm font-bold text-slate-800 mb-4">Bank BNI (ProkerMart)</p>
 
@@ -351,13 +521,14 @@ export default function CheckoutPage() {
                 </div>
 
                 <button
-                  onClick={handleFinishPayment}
-                  className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-sm"
+                  onClick={handleManualCheck}
+                  disabled={isCheckingManual}
+                  className="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-3 px-4 rounded-xl hover:bg-blue-50 active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm leading-tight"
                 >
-                  Saya Sudah Bayar
+                  {isCheckingManual ? "Mengecek..." : "Klik ini jika pembayaran belum dinyatakan selesai"}
                 </button>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       )}
