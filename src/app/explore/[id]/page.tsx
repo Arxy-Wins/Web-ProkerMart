@@ -11,6 +11,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useState } from "react";
+import { Navbar } from "@/components/Navbar";
 
 export default function ProductDetail() {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-6 md:px-8 md:py-10">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
@@ -58,7 +60,7 @@ export default function ProductDetail() {
             {dummyProduct.category}
           </Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-800 font-medium truncate max-w-[200px]">
+          <span className="text-slate-800 font-medium truncate max-w-50">
             {dummyProduct.name}
           </span>
         </nav>
@@ -67,8 +69,8 @@ export default function ProductDetail() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
             {/* KOLOM KIRI - Gambar */}
-            <div className="bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-8 md:pt-12 flex items-start justify-center min-h-[300px] md:min-h-[420px]">
-              <div className="w-full max-w-[280px] aspect-square bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center gap-3">
+            <div className="bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-8 md:pt-12 flex items-start justify-center min-h-75 md:min-h-105">
+              <div className="w-full max-w-70 aspect-square bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center gap-3">
                 <ShoppingBag className="w-20 h-20 text-slate-300" />
                 <p className="text-xs text-slate-400">
                   Belum ada gambar produk
@@ -208,7 +210,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="flex-1 md:flex-none md:w-40 bg-emerald-600 text-black font-bold py-2.5 px-4 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                    className="flex-1 md:flex-none md:w-40 bg-emerald-600 text-white font-bold py-2.5 px-4 rounded-xl hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     Keranjang
