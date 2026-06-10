@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, PanInfo } from "framer-motion";
-import { Search, ArrowLeft, Navigation, ShoppingCart } from "lucide-react";
+import { Search, ArrowLeft, Navigation, ShoppingCart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { NearbyShopCard } from "@/components/NearbyShopCard";
 
@@ -17,84 +17,116 @@ const MapArea = dynamic(() => import("@/components/MapArea"), {
   ),
 });
 
-// Mock user location (Jimbaran area from the screenshot)
-const MOCK_USER_LOCATION = {
+// Mock fallback user location (Jimbaran area) in case geolocation fails
+const FALLBACK_USER_LOCATION = {
   lat: -8.795,
   lng: 115.176,
 };
 
-// Mock data for nearby shops based on screenshot details
-const MOCK_NEARBY_SHOPS = [
-  {
-    id: "S001",
-    name: "BEM FMIPA - Dies Natalis",
-    categories: "Makanan, Minuman",
-    rating: 4.8,
-    reviewCount: "125",
-    distanceKm: 0.6,
-    travelTimeMin: 10,
-    imageUrl: "/placeholder.jpg",
-    promoTag: "Terlaris",
-    lat: -8.793,
-    lng: 115.172,
-  },
-  {
-    id: "S002",
-    name: "HIMA TI - IT Expo",
-    categories: "Pakaian, Merchandise",
-    rating: 4.9,
-    reviewCount: "340",
-    distanceKm: 0.9,
-    travelTimeMin: 15,
-    imageUrl: "/placeholder.jpg",
-    lat: -8.798,
-    lng: 115.18,
-  },
-  {
-    id: "S003",
-    name: "UKM Kesenian - Pentas Seni",
-    categories: "Merchandise, Jasa",
-    rating: 4.7,
-    reviewCount: "89",
-    distanceKm: 2.0,
-    travelTimeMin: 25,
-    imageUrl: "/placeholder.jpg",
-    promoTag: "Pre-order",
-    lat: -8.81,
-    lng: 115.185,
-  },
-  {
-    id: "S004",
-    name: "DPM Universitas - Raker",
-    categories: "Makanan, Snack",
-    rating: 4.9,
-    reviewCount: "50+",
-    distanceKm: 0.2,
-    travelTimeMin: 5,
-    imageUrl: "/placeholder.jpg",
-    lat: -8.796,
-    lng: 115.175,
-  },
-];
-
-// const TABS = ["Terkait", "Terdekat", "Terlaris", "Rating"];
+interface Shop {
+  id: string;
+  name: string;
+  categories: string;
+  rating: number;
+  reviewCount: number | string;
+  distanceKm: number;
+  travelTimeMin: number;
+  imageUrl: string;
+  promoTag?: string;
+  lat: number;
+  lng: number;
+}
 
 export default function NearbyShopsPage() {
-  // const [activeTab, setActiveTab] = useState("Terdekat");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  const [userLocation, setUserLocation] = useState(FALLBACK_USER_LOCATION);
+  const [shops, setShops] = useState<Shop[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Debounce search input
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 500);
+  };
+
+  // Fetch nearby shops from API
+  const fetchNearbyShops = useCallback(async (lat: number, lng: number, search: string) => {
+    setIsLoading(true);
+    setErrorMsg("");
+    try {
+      const params = new URLSearchParams({
+        lat: String(lat),
+        lng: String(lng),
+        radius: "10", // 10km radius
+      });
+      if (search) params.set("search", search);
+
+      const res = await fetch(`/api/nearby?${params.toString()}`);
+      if (!res.ok) throw new Error("Gagal mengambil data toko");
+      
+      const data = await res.json();
+      setShops(data.shops || []);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Terjadi kesalahan.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Request user location
+  const handleGetLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert("Geolokasi tidak didukung oleh browser Anda.");
+      return;
+    }
+
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(newLocation);
+        setIsGettingLocation(false);
+        // Map will re-render and API will be re-fetched via useEffect
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert("Gagal mendapatkan lokasi. Pastikan izin lokasi diberikan.");
+        setIsGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, []);
+
+  // Re-fetch when location or search changes
+  useEffect(() => {
+    fetchNearbyShops(userLocation.lat, userLocation.lng, debouncedSearch);
+  }, [userLocation, debouncedSearch, fetchNearbyShops]);
+
+  // Initial location request (optional, can just use fallback initially)
+  // useEffect(() => {
+  //   handleGetLocation();
+  // }, [handleGetLocation]);
 
   const handleDragEnd = (
     event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
+    info: PanInfo
   ) => {
-    // Jika di-drag ke atas (nilai y negatif)
     if (info.offset.y < -30) {
       setIsExpanded(true);
-    }
-    // Jika di-drag ke bawah (nilai y positif)
-    else if (info.offset.y > 30) {
+    } else if (info.offset.y > 30) {
       setIsExpanded(false);
     }
   };
@@ -116,22 +148,25 @@ export default function NearbyShopsPage() {
             </div>
             <input
               type="text"
-              placeholder="Cari toko atau proker di sekitarmu"
+              placeholder="Cari penjual, toko atau proker di sekitarmu"
               className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/70 focus:outline-none focus:bg-white focus:text-slate-900 focus:placeholder:text-slate-400 transition-all"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
-          <button className="p-2 relative hover:bg-white/10 rounded-full transition-colors">
+          <Link
+            href="/cart"
+            className="p-2 relative hover:bg-white/10 rounded-full transition-colors"
+          >
             <ShoppingCart className="w-6 h-6" />
             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-primary-600 rounded-full"></span>
-          </button>
+          </Link>
         </div>
       </div>
 
       {/* Main Content Area (Map + List) */}
-      <div className="flex-1 relative flex flex-col lg:flex-row-reverse  z-10 bg-white rounded-t-3xl overflow-hidden shadow-xl lg:shadow-none lg:mt-0 lg:rounded-none lg:bg-transparent">
-        {/* Map Container - Full width on mobile top, half width on desktop */}
+      <div className="flex-1 relative flex flex-col lg:flex-row-reverse z-10 bg-white rounded-t-3xl overflow-hidden shadow-xl lg:shadow-none lg:mt-0 lg:rounded-none lg:bg-transparent">
+        {/* Map Container */}
         <motion.div
           initial={false}
           animate={{ height: isExpanded ? "0vh" : "40vh" }}
@@ -139,23 +174,31 @@ export default function NearbyShopsPage() {
           className="lg:h-full! lg:w-1/2 relative bg-slate-200 overflow-hidden"
         >
           <MapArea
-            userLocation={MOCK_USER_LOCATION}
-            shops={MOCK_NEARBY_SHOPS}
+            userLocation={userLocation}
+            shops={shops}
             onMarkerClick={(id) => setActiveShopId(id)}
             activeShopId={activeShopId}
           />
 
           {/* Location Indicator Over Map */}
           <div className="absolute bottom-4 right-4 z-400 flex flex-col gap-2 items-end">
-            <button className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-600 hover:bg-slate-50">
-              <Navigation className="w-5 h-5 fill-current" />
+            <button 
+              onClick={handleGetLocation}
+              disabled={isGettingLocation}
+              title="Dapatkan lokasi saat ini"
+              className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-600 hover:bg-slate-50 disabled:opacity-50 transition-all"
+            >
+              {isGettingLocation ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <Navigation className="w-6 h-6 fill-current" />
+              )}
             </button>
           </div>
-
         </motion.div>
 
         {/* Bottom Sheet / Sidebar List */}
-        <div className="flex-1 flex flex-col bg-white overflow-hidden lg:w-1/2 lg:rounded-tr-3xl  relative z-20">
+        <div className="flex-1 flex flex-col bg-white overflow-hidden lg:w-1/2 lg:rounded-tr-3xl relative z-20">
           {/* Drag Handle for Mobile */}
           <motion.div
             drag="y"
@@ -168,54 +211,30 @@ export default function NearbyShopsPage() {
             <div className="w-12 h-1.5 bg-slate-300 rounded-full"></div>
           </motion.div>
 
-          <div className="px-4 py-2 lg:py-4">
-            {/* Tabs */}
-            {/* <div className="flex border-b border-slate-200 mb-4">
-              {TABS.map((tab) => (
-                <button
-                  key={tab}
-                  className={`flex-1 pb-3 text-sm font-medium text-center transition-colors relative ${
-                    activeTab === tab
-                      ? "text-primary-600"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                  {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600"></div>
-                  )}
-                </button>
-              ))}
-            </div> */}
-
-            {/* Filters */}
-            {/* <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-              <button className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-full text-xs font-medium text-slate-600 whitespace-nowrap">
-                Jarak Toko <Filter className="w-3 h-3" />
-              </button>
-              <button className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-full text-xs font-medium text-slate-600 whitespace-nowrap">
-                Promo <Filter className="w-3 h-3" />
-              </button>
-              <button className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-full text-xs font-medium text-slate-600 whitespace-nowrap">
-                Kategori Produk <Filter className="w-3 h-3" />
-              </button>
-            </div> */}
-          </div>
-
           {/* List Content */}
           <div className="flex-1 overflow-y-auto px-4 pb-4">
-            {activeShopId ? (
+            {isLoading && shops.length === 0 ? (
+              <div className="flex justify-center items-center h-32">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+              </div>
+            ) : errorMsg ? (
+              <div className="text-center py-10 text-red-500">
+                <p>{errorMsg}</p>
+                <button onClick={() => fetchNearbyShops(userLocation.lat, userLocation.lng, debouncedSearch)} className="mt-2 text-primary-600 font-medium">Coba Lagi</button>
+              </div>
+            ) : activeShopId && shops.find((s) => s.id === activeShopId) ? (
               <div className="flex flex-col gap-4 pt-2">
-                <NearbyShopCard {...MOCK_NEARBY_SHOPS.find(s => s.id === activeShopId)!} />
-                
+                <NearbyShopCard
+                  {...shops.find((s) => s.id === activeShopId)!}
+                />
+
                 <div className="flex flex-col gap-2 mt-2">
                   <Link href={`/explore/${activeShopId}`} className="w-full">
                     <button className="w-full bg-primary-600 text-white font-medium py-3 px-4 rounded-xl shadow-sm flex justify-center items-center hover:bg-primary-700 transition-colors gap-2">
                       Lihat Penjual <ArrowLeft className="w-4 h-4 rotate-180" />
                     </button>
                   </Link>
-                  <button 
+                  <button
                     onClick={() => setActiveShopId(null)}
                     className="w-full bg-slate-100 text-slate-700 font-medium py-3 px-4 rounded-xl flex justify-center items-center hover:bg-slate-200 transition-colors"
                   >
@@ -223,9 +242,9 @@ export default function NearbyShopsPage() {
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : shops.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {MOCK_NEARBY_SHOPS.map((shop) => (
+                {shops.map((shop) => (
                   <div
                     key={shop.id}
                     className="cursor-pointer"
@@ -234,6 +253,12 @@ export default function NearbyShopsPage() {
                     <NearbyShopCard {...shop} />
                   </div>
                 ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500">
+                <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p>Tidak ada penjual di sekitarmu.</p>
+                <p className="text-sm mt-1">Coba geser peta atau ubah kata kunci pencarian.</p>
               </div>
             )}
           </div>

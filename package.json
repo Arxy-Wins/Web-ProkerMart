@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:local": "next dev -H localhost",
+    "dev-https": "next dev --experimental-https",
+    "dev-local": "next dev -H localhost",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

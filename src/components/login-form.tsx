@@ -22,11 +22,16 @@ export function LoginForm() {
     const supabase = createClient();
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
       router.push("/");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Email atau password salah.");
+      setError(
+        err instanceof Error ? err.message : "Email atau password salah.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -39,15 +44,22 @@ export function LoginForm() {
 
       {/* Heading */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Selamat Datang</h1>
-        <p className="text-slate-500">Masuk ke akun ProkerMart Anda untuk melanjutkan.</p>
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          Selamat Datang
+        </h1>
+        <p className="text-slate-500">
+          Masuk ke akun ProkerMart Anda untuk melanjutkan.
+        </p>
       </div>
 
       {/* Form */}
       <form onSubmit={handleLogin} className="flex flex-col gap-5">
         {/* Email Field */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-slate-700 mb-1.5"
+          >
             Email
           </label>
           <input
@@ -64,7 +76,10 @@ export function LoginForm() {
         {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700"
+            >
               Password
             </label>
             <Link
@@ -89,7 +104,11 @@ export function LoginForm() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
@@ -121,8 +140,19 @@ export function LoginForm() {
         {/* Sign-up link */}
         <p className="text-center text-sm text-slate-500">
           Belum punya akun?{" "}
-          <Link href="/auth/sign-up" className="font-semibold text-primary-600 hover:text-primary-700">
+          <Link
+            href="/auth/sign-up"
+            className="font-semibold text-primary-600 hover:text-primary-700"
+          >
             Daftar sekarang
+          </Link>
+        </p>
+        <p className="text-center text-sm text-slate-500">
+          <Link
+            href="/login-bypass"
+            className="font-semibold text-primary-600 hover:text-primary-700"
+          >
+            Login Bypass
           </Link>
         </p>
       </form>
