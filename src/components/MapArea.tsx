@@ -60,12 +60,37 @@ export default function MapArea({
       map,
     );
 
-    // User location marker
-    L.marker([userLocation.lat, userLocation.lng], { icon: customIcon })
+    // We will handle user location and shop markers in a separate useEffect
+    // to support dynamic updates.
+    
+    // CRITICAL: Call map.remove() on cleanup — this properly releases the
+    // container so HMR remounts never hit "Map container is being reused".
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      markersRef.current = {};
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount only
+
+  // Update markers when shops or userLocation change
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    // Clear old markers
+    if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
+    Object.values(markersRef.current).forEach((marker) => map.removeLayer(marker));
+    markersRef.current = {};
+
+    // Add user location marker
+    userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], { icon: customIcon })
       .addTo(map)
       .bindPopup("Lokasi Anda");
 
-    // Shop markers
+    // Add shop markers
     shops.forEach((shop) => {
       const marker = L.marker([shop.lat, shop.lng], { icon: customIcon })
         .addTo(map)
@@ -77,16 +102,7 @@ export default function MapArea({
         marker.on("click", () => onMarkerClick(shop.id));
       }
     });
-
-    // CRITICAL: Call map.remove() on cleanup — this properly releases the
-    // container so HMR remounts never hit "Map container is being reused".
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-      markersRef.current = {};
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount only
+  }, [shops, userLocation.lat, userLocation.lng, onMarkerClick]);
 
   // Update view when userLocation changes after mount
   useEffect(() => {

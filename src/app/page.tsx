@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { ArrowRight, ShoppingBag, Store, Zap, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function Home() {
   return (
@@ -11,7 +12,7 @@ export default function Home() {
       <Navbar />
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
-        <section className="relative pt-20 pb-32 overflow-hidden">
+        <section className="relative py-12 md:py-20 lg:py-24 overflow-hidden">
           {/* Background Decorations */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200 dark:bg-primary-900/50 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 dark:opacity-20 animate-blob"></div>
@@ -26,17 +27,17 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 transition-colors">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 text-primary-600 dark:text-primary-400 text-sm font-medium mb-8 transition-colors">
                   <span className="flex h-2 w-2 rounded-full bg-primary-600 dark:bg-primary-400"></span>
                   Platform Resmi Organisasi Mahasiswa
                 </span>
-                <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 transition-colors">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 transition-colors">
                   Dukung Proker Kampus, <br className="hidden md:block" />
                   <span className="text-transparent bg-clip-text bg-linear-to-r from-primary-500 to-blue-500">
                     Lebih Mudah & Modern
                   </span>
                 </h1>
-                <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-2xl mx-auto transition-colors">
+                <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-300 mb-8 leading-relaxed max-w-2xl mx-auto transition-colors">
                   ProkerMart adalah ekosistem digital terpadu untuk jual-beli
                   program kerja mahasiswa. Temukan merchandise, makanan, dan
                   layanan dari berbagai organisasi dalam satu platform.
@@ -62,9 +63,9 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 bg-white dark:bg-slate-900 transition-colors">
+        <section className="py-12 md:py-20 lg:py-24 bg-white dark:bg-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 transition-colors">
                 Mengapa Menggunakan ProkerMart?
               </h2>
@@ -121,7 +122,7 @@ export default function Home() {
         </section>
 
         {/* Trending Products */}
-        <section className="py-20 bg-slate-50 dark:bg-slate-900/50 transition-colors">
+        <section className="py-12 md:py-20 lg:py-24 bg-slate-50 dark:bg-slate-900/50 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-end mb-12">
               <div>
@@ -229,12 +230,7 @@ export default function Home() {
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex justify-center items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-linear-to-br from-primary-500 to-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
-            <span className="font-bold text-xl text-slate-900 dark:text-white transition-colors">
-              ProkerMart
-            </span>
+            <Logo />
           </div>
           <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md mx-auto transition-colors">
             Membangun ekosistem wirausaha mahasiswa yang modern, transparan, dan

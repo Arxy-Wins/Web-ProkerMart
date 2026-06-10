@@ -5,7 +5,7 @@ interface NearbyShopCardProps {
   name: string;
   categories: string;
   rating: number;
-  reviewCount: string;
+  reviewCount: string | number;
   distanceKm: number;
   travelTimeMin: number;
   imageUrl: string;
