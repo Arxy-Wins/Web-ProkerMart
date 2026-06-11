@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, PanInfo } from "framer-motion";
-import { Search, ArrowLeft, Navigation, ShoppingCart, Loader2 } from "lucide-react";
+import {
+  Search,
+  ArrowLeft,
+  Navigation,
+  ShoppingCart,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { NearbyShopCard } from "@/components/NearbyShopCard";
 import type { MarkerData } from "@/components/MapArea";
@@ -49,7 +55,7 @@ export default function NearbyShopsPage() {
 
   const [activeShopId, setActiveShopId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const [userLocation, setUserLocation] = useState(FALLBACK_USER_LOCATION);
   const [shops, setShops] = useState<Shop[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,16 +69,16 @@ export default function NearbyShopsPage() {
       title: "Lokasi Anda",
       lat: userLocation.lat,
       lng: userLocation.lng,
-      type: "pembeli"
+      type: "pembeli",
     });
 
-    shops.forEach(shop => {
+    shops.forEach((shop) => {
       arr.push({
         id: shop.id,
         title: `Proker: ${shop.name}`,
         lat: shop.lat,
         lng: shop.lng,
-        type: "subtoko"
+        type: "subtoko",
       });
 
       if (shop.tokoCoords) {
@@ -81,18 +87,18 @@ export default function NearbyShopsPage() {
           title: `Toko: ${shop.tokoName || "Toko Utama"}`,
           lat: shop.tokoCoords.lat,
           lng: shop.tokoCoords.lng,
-          type: "toko"
+          type: "toko",
         });
       }
 
       if (shop.panitiaList) {
-        shop.panitiaList.forEach(p => {
+        shop.panitiaList.forEach((p) => {
           arr.push({
             id: `panitia-${p.id}`,
             title: `Panitia: ${p.name}`,
             lat: p.lat,
             lng: p.lng,
-            type: "panitia"
+            type: "panitia",
           });
         });
       }
@@ -109,29 +115,32 @@ export default function NearbyShopsPage() {
   };
 
   // Fetch nearby shops from API
-  const fetchNearbyShops = useCallback(async (lat: number, lng: number, search: string) => {
-    setIsLoading(true);
-    setErrorMsg("");
-    try {
-      const params = new URLSearchParams({
-        lat: String(lat),
-        lng: String(lng),
-        radius: "10", // 10km radius
-      });
-      if (search) params.set("search", search);
+  const fetchNearbyShops = useCallback(
+    async (lat: number, lng: number, search: string) => {
+      setIsLoading(true);
+      setErrorMsg("");
+      try {
+        const params = new URLSearchParams({
+          lat: String(lat),
+          lng: String(lng),
+          radius: "10", // 10km radius
+        });
+        if (search) params.set("search", search);
 
-      const res = await fetch(`/api/nearby?${params.toString()}`);
-      if (!res.ok) throw new Error("Gagal mengambil data toko");
-      
-      const data = await res.json();
-      setShops(data.shops || []);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.message || "Terjadi kesalahan.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        const res = await fetch(`/api/nearby?${params.toString()}`);
+        if (!res.ok) throw new Error("Gagal mengambil data toko");
+
+        const data = await res.json();
+        setShops(data.shops || []);
+      } catch (err: any) {
+        console.error(err);
+        setErrorMsg(err.message || "Terjadi kesalahan.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   // Request user location
   const handleGetLocation = useCallback(() => {
@@ -156,7 +165,7 @@ export default function NearbyShopsPage() {
         alert("Gagal mendapatkan lokasi. Pastikan izin lokasi diberikan.");
         setIsGettingLocation(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, []);
 
@@ -172,7 +181,7 @@ export default function NearbyShopsPage() {
 
   const handleDragEnd = (
     event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
+    info: PanInfo,
   ) => {
     if (info.offset.y < -30) {
       setIsExpanded(true);
@@ -228,7 +237,7 @@ export default function NearbyShopsPage() {
             markers={mapMarkers}
             onMarkerClick={(id) => {
               // Only select if it is a shop id (not toko-xxx or panitia-xxx or user-loc)
-              if (shops.some(s => s.id === id)) {
+              if (shops.some((s) => s.id === id)) {
                 setActiveShopId(id);
               }
             }}
@@ -237,7 +246,7 @@ export default function NearbyShopsPage() {
 
           {/* Location Indicator Over Map */}
           <div className="absolute bottom-4 right-4 z-400 flex flex-col gap-2 items-end">
-            <button 
+            <button
               onClick={handleGetLocation}
               disabled={isGettingLocation}
               title="Dapatkan lokasi saat ini"
@@ -267,7 +276,7 @@ export default function NearbyShopsPage() {
           </motion.div>
 
           {/* List Content */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="flex-1 overflow-y-auto overscroll-none px-4 pb-4">
             {isLoading && shops.length === 0 ? (
               <div className="flex justify-center items-center h-32">
                 <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -275,7 +284,18 @@ export default function NearbyShopsPage() {
             ) : errorMsg ? (
               <div className="text-center py-10 text-red-500">
                 <p>{errorMsg}</p>
-                <button onClick={() => fetchNearbyShops(userLocation.lat, userLocation.lng, debouncedSearch)} className="mt-2 text-primary-600 font-medium">Coba Lagi</button>
+                <button
+                  onClick={() =>
+                    fetchNearbyShops(
+                      userLocation.lat,
+                      userLocation.lng,
+                      debouncedSearch,
+                    )
+                  }
+                  className="mt-2 text-primary-600 font-medium"
+                >
+                  Coba Lagi
+                </button>
               </div>
             ) : activeShopId && shops.find((s) => s.id === activeShopId) ? (
               <div className="flex flex-col gap-4 pt-2">
@@ -284,8 +304,8 @@ export default function NearbyShopsPage() {
                 />
 
                 <div className="flex flex-col gap-2 mt-2">
-                  <Link 
-                    href={`/organizations/${shops.find((s) => s.id === activeShopId)?.tokoId}/${activeShopId}`} 
+                  <Link
+                    href={`/organizations/${shops.find((s) => s.id === activeShopId)?.tokoId}/${activeShopId}`}
                     className="w-full"
                   >
                     <button className="w-full bg-primary-600 text-white font-medium py-3 px-4 rounded-xl shadow-sm flex justify-center items-center hover:bg-primary-700 transition-colors gap-2">
@@ -316,7 +336,9 @@ export default function NearbyShopsPage() {
               <div className="text-center py-12 text-slate-500">
                 <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                 <p>Tidak ada penjual di sekitarmu.</p>
-                <p className="text-sm mt-1">Coba geser peta atau ubah kata kunci pencarian.</p>
+                <p className="text-sm mt-1">
+                  Coba geser peta atau ubah kata kunci pencarian.
+                </p>
               </div>
             )}
           </div>
