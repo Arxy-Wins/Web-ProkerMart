@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Store, ChevronRight, Truck, Loader2, Star, X } from "lucide-react";
+import {
+  Search,
+  Store,
+  ChevronRight,
+  Truck,
+  Loader2,
+  Star,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { UserSidebar } from "@/components/user/UserSidebar";
@@ -175,8 +183,7 @@ export default function PurchasePage() {
               id_produk: dp.id_produk,
               name: dp.produk?.nama_produk || "Produk Dihapus",
               image:
-                dp.produk?.foto ||
-                "https://placehold.co/100x100?text=No+Image",
+                dp.produk?.foto || "https://placehold.co/100x100?text=No+Image",
               variation: dp.produk?.kategori || "Umum",
               quantity: dp.jumlah,
               price: dp.harga_satuan,
@@ -217,7 +224,12 @@ export default function PurchasePage() {
   };
 
   const handleCompleteOrder = async (orderId: string) => {
-    if (!confirm("Apakah Anda yakin sudah menerima pesanan ini dan ingin menyelesaikannya?")) return;
+    if (
+      !confirm(
+        "Apakah Anda yakin sudah menerima pesanan ini dan ingin menyelesaikannya?",
+      )
+    )
+      return;
     try {
       setIsLoading(true);
       const { error } = await supabase
@@ -263,15 +275,13 @@ export default function PurchasePage() {
         return;
       }
 
-      const { error } = await supabase
-        .from("ulasan")
-        .insert({
-          id_pengguna: user.id,
-          id_sub_toko: ratingOrder.storeId,
-          id_pesanan: ratingOrder.id_pesanan,
-          rating: ratingValue,
-          komentar: ratingComment || null,
-        });
+      const { error } = await supabase.from("ulasan").insert({
+        id_pengguna: user.id,
+        id_sub_toko: ratingOrder.storeId,
+        id_pesanan: ratingOrder.id_pesanan,
+        rating: ratingValue,
+        komentar: ratingComment || null,
+      });
 
       if (error) throw error;
 
@@ -287,7 +297,9 @@ export default function PurchasePage() {
     }
   };
 
-  const handleBuyAgain = async (items: Array<{ id_produk: string; quantity: number }>) => {
+  const handleBuyAgain = async (
+    items: Array<{ id_produk: string; quantity: number }>,
+  ) => {
     try {
       setIsLoading(true);
       const {
@@ -552,7 +564,9 @@ export default function PurchasePage() {
                             </button>
                             {order.isRated ? (
                               <button
-                                onClick={() => handleOpenRatingModal(order, true)}
+                                onClick={() =>
+                                  handleOpenRatingModal(order, true)
+                                }
                                 className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium rounded-sm transition-all whitespace-nowrap"
                               >
                                 Lihat Penilaian
@@ -569,13 +583,17 @@ export default function PurchasePage() {
                         ) : order.statusLabel === "Belum Bayar" ? (
                           <>
                             <button
-                              onClick={() => handleCancelOrder(order.id_pesanan)}
+                              onClick={() =>
+                                handleCancelOrder(order.id_pesanan)
+                              }
                               className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 text-slate-600 text-xs sm:text-sm font-medium rounded-sm hover:bg-slate-50 whitespace-nowrap"
                             >
                               Batalkan Pesanan
                             </button>
                             <button
-                              onClick={() => router.push(`/user/purchase/${order.id}`)}
+                              onClick={() =>
+                                router.push(`/user/purchase/${order.id}`)
+                              }
                               className="flex-1 sm:flex-none px-4 py-2 bg-primary-600 text-white text-xs sm:text-sm font-medium rounded-sm shadow-md hover:bg-primary-700 whitespace-nowrap"
                             >
                               Bayar Sekarang
@@ -592,7 +610,9 @@ export default function PurchasePage() {
                               Hubungi Penjual
                             </button>
                             <button
-                              onClick={() => handleCompleteOrder(order.id_pesanan)}
+                              onClick={() =>
+                                handleCompleteOrder(order.id_pesanan)
+                              }
                               className="flex-1 sm:flex-none px-4 py-2 bg-primary-600 text-white text-xs sm:text-sm font-medium rounded-sm shadow-md hover:bg-primary-700 whitespace-nowrap"
                             >
                               Pesanan Diterima
@@ -602,11 +622,16 @@ export default function PurchasePage() {
                           <>
                             <button
                               onClick={() =>
-                                handleOpenChat(order.storeId, order.storeName)
+                                handleBuyAgain(
+                                  order.items.map((item) => ({
+                                    id_produk: item.id_produk,
+                                    quantity: item.quantity,
+                                  })),
+                                )
                               }
-                              className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 text-slate-600 text-xs sm:text-sm font-medium rounded-sm hover:bg-slate-50 whitespace-nowrap"
+                              className="flex-1 sm:flex-none px-4 py-2 bg-primary-600 text-white text-xs sm:text-sm font-medium rounded-sm shadow-md hover:bg-primary-700 transition-all whitespace-nowrap"
                             >
-                              Hubungi Penjual
+                              Beli Lagi
                             </button>
                           </>
                         )}
@@ -642,9 +667,13 @@ export default function PurchasePage() {
             <div className="p-4 space-y-4">
               <div className="text-center space-y-1">
                 <p className="text-xs text-slate-500 uppercase tracking-wider">
-                  {isReadOnlyRating ? "Sub-toko yang Dinilai" : "Menilai Sub-toko"}
+                  {isReadOnlyRating
+                    ? "Sub-toko yang Dinilai"
+                    : "Menilai Sub-toko"}
                 </p>
-                <p className="font-bold text-slate-800 text-base">{ratingOrder.storeName}</p>
+                <p className="font-bold text-slate-800 text-base">
+                  {ratingOrder.storeName}
+                </p>
               </div>
 
               {/* Stars */}
@@ -676,7 +705,9 @@ export default function PurchasePage() {
                 </label>
                 <textarea
                   value={ratingComment}
-                  onChange={(e) => !isReadOnlyRating && setRatingComment(e.target.value)}
+                  onChange={(e) =>
+                    !isReadOnlyRating && setRatingComment(e.target.value)
+                  }
                   disabled={isReadOnlyRating}
                   placeholder={
                     isReadOnlyRating
