@@ -11,6 +11,7 @@ import { MobileHeader } from "./MobileHeader";
 import { createClient } from "@/lib/supabase/client";
 import { getCartItems } from "@/lib/supabase/queries/cart";
 import { logout } from "./logout-button";
+import { SwitchRoleButton } from "./switch-role-button";
 
 interface NavbarProps {
   variant?: "default" | "cart";
@@ -205,6 +206,11 @@ export function Navbar({ variant = "default" }: NavbarProps) {
                           >
                             Pesanan Saya
                           </Link>
+                          <SwitchRoleButton
+                            currentRoute="/explore"
+                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+                            onNavigate={() => setIsUserMenuOpen(false)}
+                          />
                           <button
                             onClick={logout}
                             className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"

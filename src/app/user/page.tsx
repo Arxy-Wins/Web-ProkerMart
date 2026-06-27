@@ -23,6 +23,7 @@ import { Navbar } from "@/components/Navbar";
 import { UserSidebar } from "@/components/user/UserSidebar";
 import { MobileHeader } from "@/components/MobileHeader";
 import { LogoutButton } from "@/components/logout-button";
+import { SwitchRoleButton } from "@/components/switch-role-button";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -330,7 +331,11 @@ export default function UserDashboardPage() {
               </div>
 
               {/* Logout Button Mobile */}
-              <div className="px-4 pb-8 mt-4">
+              <div className="px-4 pb-8 mt-4 flex flex-col gap-2">
+                <SwitchRoleButton
+                  currentRoute="/explore"
+                  className="flex items-center justify-center w-full gap-2 py-3 font-medium text-slate-600 bg-white border border-slate-200 rounded-sm shadow-sm"
+                />
                 <LogoutButton className="flex items-center justify-center w-full gap-2 py-3 font-medium text-red-500 bg-white border border-red-100 rounded-sm shadow-sm"></LogoutButton>
               </div>
             </div>
