@@ -7,11 +7,12 @@ import {
   Package,
   ShoppingCart,
   Settings,
-  LogOut,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { LogoutButton } from "@/components/logout-button";
+import { SwitchRoleButton } from "@/components/switch-role-button";
 
 export default function DashboardLayout({
   children,
@@ -77,11 +78,12 @@ export default function DashboardLayout({
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-200">
-          <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors w-full">
-            <LogOut className="w-5 h-5" />
-            Keluar
-          </button>
+        <div className="p-4 border-t border-slate-200 flex flex-col gap-2">
+          <SwitchRoleButton
+            currentRoute="/dashboard"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors w-full"
+          />
+          <LogoutButton className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors w-full justify-center" />
         </div>
       </div>
 

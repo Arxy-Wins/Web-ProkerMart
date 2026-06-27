@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { fetchUserAccess } from "@/lib/auth-access";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
@@ -11,7 +12,8 @@ import { Logo } from "@/components/Logo";
 function LoginFormInner({ redirectTo }: { redirectTo?: string }) {
   const searchParams = useSearchParams();
   const redirect = redirectTo ?? searchParams.get("redirect");
-  const destination = redirect ? decodeURIComponent(redirect) : "/";
+  const destination = redirect ? decodeURIComponent(redirect) : null;
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,9 +29,41 @@ function LoginFormInner({ redirectTo }: { redirectTo?: string }) {
     const supabase = createClient();
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
-      router.push(destination);
+
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const user =
+        userData.user ??
+        sessionData?.session?.user ??
+        data.user ??
+        data.session?.user;
+
+      if (!user) {
+        throw new Error("Gagal membaca informasi pengguna setelah login.");
+      }
+
+      if (destination) {
+        router.push(destination);
+        return;
+      }
+
+      const access = await fetchUserAccess(supabase, user.email!);
+
+      if (process.env.NODE_ENV === "development") {
+        console.debug("[Login] access:", access);
+      }
+
+      const targetRoute = access?.needsSelection ? "/auth/select-role" : "/explore";
+      router.push(targetRoute);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Email atau password salah.");
     } finally {
