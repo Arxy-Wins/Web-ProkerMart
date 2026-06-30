@@ -753,20 +753,8 @@ export default function PurchasePage() {
                           ) : order.statusLabel === "Dikirim/Siap Diambil" ? (
                             <>
                               <button
-                                onClick={() => router.push(`/user/bantuan?kategori=bantuan&judul=Bantuan+Pesanan+${order.id}&pesan=Halo+admin,+saya+butuh+bantuan+terkait+pesanan+${order.id}`)}
-                                className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-slate-200 text-slate-600 sm:text-sm hover:bg-slate-50 whitespace-nowrap flex items-center justify-center gap-1.5"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" /> Hubungi Admin
-                              </button>
-                              <button
-                                onClick={() => router.push(`/user/bantuan?kategori=pembatalan&judul=Pembatalan+Pesanan+${order.id}&pesan=Halo+admin,+saya+ingin+membatalkan+pesanan+${order.id}.+Mohon+bantuannya.`)}
-                                className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-red-200 text-red-600 sm:text-sm hover:bg-red-50 whitespace-nowrap flex items-center justify-center gap-1.5"
-                              >
-                                <X className="w-3.5 h-3.5" /> Ingin Membatalkan
-                              </button>
-                              <button
                                 onClick={() =>
-                                  router.push(`/user/chat?sub_toko_id=${order.storeId}&nama=${encodeURIComponent(order.storeName)}`)
+                                  handleOpenChat(order.storeId, order.storeName)
                                 }
                                 className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-slate-200 text-slate-600 sm:text-sm hover:bg-slate-50 whitespace-nowrap"
                               >
@@ -788,23 +776,20 @@ export default function PurchasePage() {
                                     </button>
                                   );
                                 }
-                                return null;
+                                return (
+                                  <a
+                                    href="https://wa.me/6281234567890"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-slate-200 text-slate-600 sm:text-sm hover:bg-slate-50 whitespace-nowrap flex items-center justify-center gap-1.5"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5" /> Hubungi CS
+                                  </a>
+                                );
                               })()}
                               <button
-                                onClick={() => router.push(`/user/bantuan?kategori=bantuan&judul=Bantuan+Pesanan+${order.id}&pesan=Halo+admin,+saya+butuh+bantuan+terkait+pesanan+${order.id}`)}
-                                className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-slate-200 text-slate-600 sm:text-sm hover:bg-slate-50 whitespace-nowrap flex items-center justify-center gap-1.5"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" /> Hubungi Admin
-                              </button>
-                              <button
-                                onClick={() => router.push(`/user/bantuan?kategori=pembatalan&judul=Pembatalan+Pesanan+${order.id}&pesan=Halo+admin,+saya+ingin+membatalkan+pesanan+${order.id}.+Mohon+bantuannya.`)}
-                                className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-red-200 text-red-600 sm:text-sm hover:bg-red-50 whitespace-nowrap flex items-center justify-center gap-1.5"
-                              >
-                                <X className="w-3.5 h-3.5" /> Ingin Membatalkan
-                              </button>
-                              <button
                                 onClick={() =>
-                                  router.push(`/user/chat?sub_toko_id=${order.storeId}&nama=${encodeURIComponent(order.storeName)}`)
+                                  handleOpenChat(order.storeId, order.storeName)
                                 }
                                 className="flex-1 px-4 py-2 text-xs font-medium border rounded-sm sm:flex-none border-slate-200 text-slate-600 sm:text-sm hover:bg-slate-50 whitespace-nowrap"
                               >

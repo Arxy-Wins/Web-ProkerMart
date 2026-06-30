@@ -84,11 +84,10 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<OrderStatus | "all">("all");
 
-  // Cancel-by-seller modal (for diproses / menunggu_konfirmasi after accept)
-  const [cancelTarget, setCancelTarget] = useState<Order | null>(null);
-  const [cancelReason, setCancelReason] = useState("");
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [cancelSuccess, setCancelSuccess] = useState<string | null>(null);
+  // Reject modal
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [isRejecting, setIsRejecting] = useState(false);
 
   // Track recently accepted orders for 10s cancel window: id_pesanan → accepted timestamp
   const [recentlyAccepted, setRecentlyAccepted] = useState<Record<string, number>>({});
@@ -177,33 +176,27 @@ export default function OrdersPage() {
     }
   };
 
-  const handleCancelBySeller = async () => {
-    if (!cancelTarget || cancelReason.trim().length < 10) return;
-    setIsCancelling(true);
+  const handleReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    setIsRejecting(true);
     try {
-      const res = await fetch("/api/orders/cancel-by-seller", {
+      const res = await fetch("/api/orders/seller-cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_pesanan: cancelTarget.id_pesanan, alasan: cancelReason.trim() }),
+        body: JSON.stringify({ id_pesanan: rejectTarget, alasan_batal: rejectReason.trim() }),
       });
-      const data = await res.json();
       if (!res.ok) {
-        console.error("[OrdersPage - handleCancelBySeller] Error:", data.error);
+        const d = await res.json();
+        console.error("[OrdersPage - handleReject] Error:", d.error);
         return;
       }
-      setOrders((prev) => prev.map((o) => o.id_pesanan === cancelTarget.id_pesanan ? { ...o, status_pesanan: "dibatalkan" } : o));
-      const refundInfo = data.metode_pembayaran === "qris"
-        ? (data.status_refund === "selesai" ? "Refund QRIS berhasil diproses." : "Refund QRIS gagal, hubungi admin.")
-        : data.metode_pembayaran === "transfer"
-        ? "Refund akan diproses manual oleh admin."
-        : "Tidak ada refund (tunai).";
-      setCancelSuccess(`Pesanan berhasil dibatalkan. ${refundInfo}`);
-      setCancelTarget(null);
-      setCancelReason("");
+      setOrders((prev) => prev.map((o) => o.id_pesanan === rejectTarget ? { ...o, status_pesanan: "dibatalkan" } : o));
+      setRejectTarget(null);
+      setRejectReason("");
     } catch (err) {
-      console.error("[OrdersPage - handleCancelBySeller] Error:", err);
+      console.error("[OrdersPage - handleReject] Error:", err);
     } finally {
-      setIsCancelling(false);
+      setIsRejecting(false);
     }
   };
 
@@ -421,10 +414,10 @@ export default function OrdersPage() {
                           </button>
                           <button
                             disabled={isProcessing}
-                            onClick={() => { setCancelTarget(order); setCancelReason(""); }}
+                            onClick={() => { setRejectTarget(order.id_pesanan); setRejectReason(""); }}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-xs font-bold rounded-lg border border-red-200 hover:border-red-500 transition-colors disabled:opacity-50"
                           >
-                            <X className="w-3.5 h-3.5" /> Batalkan
+                            <X className="w-3.5 h-3.5" /> Tolak
                           </button>
                         </>
                       )}
@@ -469,34 +462,23 @@ export default function OrdersPage() {
                       )}
                       {order.status_pesanan === "diproses" && (() => {
                         const hasDelivery = order.detail_pesanan?.some(d => d.metode_pengambilan === "delivery");
-                        return (
-                          <>
-                            {hasDelivery ? (
-                              <button
-                                onClick={() => router.push(`/dashboard/delivery/${order.id_pesanan}`)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-lg transition-colors"
-                              >
-                                <MapPin className="w-3.5 h-3.5" />
-                                Mulai Antar
-                              </button>
-                            ) : (
-                              <button
-                                disabled={isProcessing}
-                                onClick={() => updateStatus(order.id_pesanan, "siap_diambil")}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500 hover:bg-violet-600 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
-                              >
-                                {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                                Siap Ambil
-                              </button>
-                            )}
-                            <button
-                              disabled={isProcessing}
-                              onClick={() => { setCancelTarget(order); setCancelReason(""); }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white text-xs font-bold rounded-lg border border-red-200 hover:border-red-500 transition-colors disabled:opacity-50"
-                            >
-                              <X className="w-3.5 h-3.5" /> Batalkan
-                            </button>
-                          </>
+                        return hasDelivery ? (
+                          <button
+                            onClick={() => router.push(`/dashboard/delivery/${order.id_pesanan}`)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-lg transition-colors"
+                          >
+                            <MapPin className="w-3.5 h-3.5" />
+                            Mulai Antar
+                          </button>
+                        ) : (
+                          <button
+                            disabled={isProcessing}
+                            onClick={() => updateStatus(order.id_pesanan, "siap_diambil")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500 hover:bg-violet-600 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                            Siap Ambil
+                          </button>
                         );
                       })()}
                       {order.status_pesanan === "siap_diambil" && (
@@ -527,72 +509,44 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {/* Cancel Success Banner */}
-      {cancelSuccess && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm bg-emerald-600 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3">
-          <span>{cancelSuccess}</span>
-          <button onClick={() => setCancelSuccess(null)} className="shrink-0 p-0.5 hover:opacity-75">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Cancel By Seller Modal */}
-      {cancelTarget && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 p-4">
+      {/* Reject Modal */}
+      {rejectTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900">Batalkan Pesanan</h2>
-              <button onClick={() => setCancelTarget(null)} className="p-1 text-slate-400 hover:text-slate-600">
+              <h2 className="text-base font-bold text-slate-900">Tolak Pesanan</h2>
+              <button onClick={() => setRejectTarget(null)} className="p-1 text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="bg-slate-50 rounded-xl p-3 space-y-1">
-              <p className="text-xs text-slate-500">Kode Pesanan</p>
-              <p className="font-mono font-bold text-slate-900 text-sm">{cancelTarget.kode_unik}</p>
-              <p className="text-xs text-slate-500 mt-1">Total</p>
-              <p className="font-bold text-primary-600 text-sm">Rp {Number(cancelTarget.total_harga).toLocaleString("id-ID")}</p>
-            </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 space-y-1">
-              <p className="font-semibold">Info Refund:</p>
-              <p>• Transfer: refund manual via admin.</p>
-              <p>• QRIS: refund otomatis ke pembeli.</p>
-              <p>• COD/Tunai: tidak ada refund.</p>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Alasan pembatalan <span className="text-red-500">*</span></label>
-              <textarea
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="cth. Stok habis, tidak bisa memenuhi pesanan..."
-                rows={3}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-400 bg-white resize-none"
-              />
-              {cancelReason.length > 0 && cancelReason.trim().length < 10 && (
-                <p className="text-xs text-red-500 mt-1">Alasan minimal 10 karakter.</p>
-              )}
-            </div>
+            <p className="text-sm text-slate-500">Berikan alasan penolakan. Alasan ini akan disimpan pada data pesanan.</p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="cth. Stok habis, produk tidak tersedia..."
+              rows={3}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-400 bg-white resize-none"
+            />
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setCancelTarget(null)}
-                disabled={isCancelling}
+                onClick={() => setRejectTarget(null)}
+                disabled={isRejecting}
                 className="px-4 py-2 text-sm rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
               >
-                Kembali
+                Batal
               </button>
               <button
-                onClick={handleCancelBySeller}
-                disabled={isCancelling || cancelReason.trim().length < 10}
+                onClick={handleReject}
+                disabled={isRejecting || !rejectReason.trim()}
                 className="flex items-center gap-2 px-4 py-2 text-sm rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold disabled:opacity-50"
               >
-                {isCancelling && <Loader2 className="w-4 h-4 animate-spin" />}
-                Batalkan Pesanan
+                {isRejecting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Tolak Pesanan
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

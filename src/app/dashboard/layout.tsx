@@ -15,8 +15,6 @@ import {
   Search,
   UserCircle,
   Bell,
-  MessageSquare,
-  HelpCircle,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { LogoutButton } from "@/components/logout-button";
@@ -85,8 +83,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Laporan Penjualan", href: "/dashboard/reports", icon: TrendingUp },
     { name: "Tim Proker", href: "/dashboard/team", icon: Users },
     { name: "Pengaturan Sub Toko", href: "/dashboard/settings", icon: Settings },
-    { name: "Chat Pembeli", href: "/dashboard/chat", icon: MessageSquare },
-    { name: "Bantuan Admin", href: "/dashboard/bantuan", icon: HelpCircle },
   ];
 
   return (
@@ -201,9 +197,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-4 border-t border-slate-200 flex flex-col gap-1">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1">Akun</p>
           <Link
-            href="/dashboard/akun"
+            href="/user/account/profile"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              pathname.startsWith("/dashboard/akun")
+              pathname === "/user/account/profile"
                 ? "bg-primary-50 text-primary-600"
                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
@@ -212,9 +208,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             Akun Saya
           </Link>
           <Link
-            href="/dashboard/notifikasi"
+            href="/user/notifications/order"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              pathname === "/dashboard/notifikasi"
+              pathname.startsWith("/user/notifications")
                 ? "bg-primary-50 text-primary-600"
                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
