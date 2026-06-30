@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: oklch(0.546 0.245 262.881);
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+}
+
+html {
+  scrollbar-color: #334155 #0f172a;
+}

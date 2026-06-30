@@ -1,0 +1,153 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, X, Loader2 } from "lucide-react";
+
+type RoleFilter = "semua" | "pembeli" | "organisasi" | "proker" | "admin";
+
+interface Pengguna {
+  id_pengguna: string;
+  nama: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+const ROLE_BADGE: Record<string, string> = {
+  admin: "bg-red-100 text-red-700",
+  organisasi: "bg-violet-100 text-violet-700",
+  proker: "bg-blue-100 text-blue-700",
+  pembeli: "bg-slate-100 text-slate-600",
+};
+
+export default function PenggunaPage() {
+  const [list, setList] = useState<Pengguna[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<RoleFilter>("semua");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Pengguna | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/admin/pengguna");
+        if (!res.ok) throw new Error("Failed to fetch pengguna");
+        const data = await res.json();
+        setList(data);
+      } catch (err) {
+        console.error("[Pengguna - fetch] Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const filtered = list.filter((p) => {
+    const matchRole = filter === "semua" || p.role === filter;
+    const q = search.toLowerCase();
+    const matchSearch = p.nama?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q);
+    return matchRole && matchSearch;
+  });
+
+  const TABS: { key: RoleFilter; label: string }[] = [
+    { key: "semua", label: "Semua" },
+    { key: "pembeli", label: "Pembeli" },
+    { key: "organisasi", label: "Organisasi" },
+    { key: "proker", label: "Proker" },
+    { key: "admin", label: "Admin" },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-black text-slate-900">Manajemen Pengguna</h1>
+        <p className="text-sm text-slate-500">Pantau semua akun pengguna platform.</p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex gap-1 flex-wrap">
+          {TABS.map((t) => (
+            <button key={t.key} onClick={() => setFilter(t.key)}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${filter === t.key ? "bg-blue-600 text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 flex-1 max-w-xs">
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama / email..." className="text-sm w-full focus:outline-none" />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+      ) : (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  {["Nama", "Email", "Role", "Tgl. Daftar", "Aksi"].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-10 text-slate-400">Tidak ada pengguna ditemukan.</td></tr>
+                ) : filtered.map((p) => (
+                  <tr key={p.id_pengguna} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-900">{p.nama ?? "—"}</td>
+                    <td className="px-4 py-3 text-slate-500 text-xs">{p.email}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[11px] font-bold px-2 py-1 rounded-full ${ROLE_BADGE[p.role] ?? "bg-slate-100 text-slate-600"}`}>{p.role}</span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 text-xs">{new Date(p.created_at).toLocaleDateString("id-ID")}</td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => setSelected(p)}
+                        className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium px-2.5 py-1 rounded-lg transition-colors">
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      )}
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-black text-slate-900">Detail Pengguna</h2>
+                <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: "Nama", value: selected.nama },
+                  { label: "Email", value: selected.email },
+                  { label: "Role", value: selected.role },
+                  { label: "Tgl. Daftar", value: new Date(selected.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) },
+                  { label: "ID", value: selected.id_pengguna },
+                ].map((row) => (
+                  <div key={row.label} className="flex justify-between gap-4 border-b border-slate-100 pb-2 last:border-0">
+                    <span className="text-xs text-slate-400 shrink-0">{row.label}</span>
+                    <span className="text-xs font-medium text-slate-800 text-right break-all">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
