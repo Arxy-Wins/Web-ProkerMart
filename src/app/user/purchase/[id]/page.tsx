@@ -17,6 +17,8 @@ import {
   X,
   Loader2,
   Navigation,
+  Timer,
+  MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
@@ -114,6 +116,7 @@ function OrderDetailContent() {
 
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [tick, setTick] = useState(0);
   const [trackingPos, setTrackingPos] = useState<{ lat: number; lng: number; updatedAt: string | null } | null>(null);
   const [pengantar, setPengantar] = useState<{ nama: string; no_telepon: string | null } | null>(null);
 
@@ -329,6 +332,13 @@ function OrderDetailContent() {
       });
     }
   }, [id, fetchOrderDetail]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  void tick;
 
   // Fetch initial tracking position + realtime when dikirim
   useEffect(() => {
@@ -1120,8 +1130,20 @@ function OrderDetailContent() {
                   order.status_pesanan === "siap_diambil") && (
                   <>
                     <button
-                      onClick={() => handleOpenChat()}
-                      className="flex-1 md:flex-none px-6 py-2.5 border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                      onClick={() => router.push(`/user/bantuan?kategori=bantuan&judul=Bantuan+Pesanan+${order.kode_unik}&pesan=Halo+admin,+saya+butuh+bantuan+terkait+pesanan+${order.kode_unik}`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Hubungi Admin
+                    </button>
+                    <button
+                      onClick={() => router.push(`/user/bantuan?kategori=pembatalan&judul=Pembatalan+Pesanan+${order.kode_unik}&pesan=Halo+admin,+saya+ingin+membatalkan+pesanan+${order.kode_unik}.+Mohon+bantuannya.`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-red-200 text-red-600 font-medium rounded hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <X className="w-4 h-4" /> Ingin Membatalkan
+                    </button>
+                    <button
+                      onClick={() => router.push(`/user/chat?sub_toko_id=${order.storeId}&nama=${encodeURIComponent(order.storeName)}`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
                     >
                       Hubungi Penjual
                     </button>
@@ -1130,12 +1152,41 @@ function OrderDetailContent() {
 
                 {(order.status_pesanan === "diproses" ||
                   order.status_pesanan === "menunggu_konfirmasi") && (
-                  <button
-                    onClick={() => handleOpenChat()}
-                    className="flex-1 md:flex-none px-6 py-2.5 border border-primary-600 text-primary-600 font-medium rounded hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Store className="w-5 h-5" /> Hubungi Penjual
-                  </button>
+                  <>
+                    {order.status_pesanan === "menunggu_konfirmasi" && (() => {
+                      const elapsed = Math.floor((Date.now() - new Date(order.tgl_pesan).getTime()) / 1000);
+                      const remaining = 10 - elapsed;
+                      if (remaining > 0) {
+                        return (
+                          <button
+                            onClick={handleCancelOrder}
+                            className="flex-1 md:flex-none px-4 py-2.5 border border-red-300 text-red-600 font-medium rounded hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Timer className="w-4 h-4" /> Batalkan ({remaining}d)
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+                    <button
+                      onClick={() => router.push(`/user/bantuan?kategori=bantuan&judul=Bantuan+Pesanan+${order.kode_unik}&pesan=Halo+admin,+saya+butuh+bantuan+terkait+pesanan+${order.kode_unik}`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Hubungi Admin
+                    </button>
+                    <button
+                      onClick={() => router.push(`/user/bantuan?kategori=pembatalan&judul=Pembatalan+Pesanan+${order.kode_unik}&pesan=Halo+admin,+saya+ingin+membatalkan+pesanan+${order.kode_unik}.+Mohon+bantuannya.`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-red-200 text-red-600 font-medium rounded hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <X className="w-4 h-4" /> Ingin Membatalkan
+                    </button>
+                    <button
+                      onClick={() => router.push(`/user/chat?sub_toko_id=${order.storeId}&nama=${encodeURIComponent(order.storeName)}`)}
+                      className="flex-1 md:flex-none px-4 py-2.5 border border-primary-600 text-primary-600 font-medium rounded hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Store className="w-4 h-4" /> Hubungi Penjual
+                    </button>
+                  </>
                 )}
               </div>
             </div>
