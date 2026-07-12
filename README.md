@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛒 ProkerMart
+# <img width="36" height="36" alt="favicon-96x96" src="https://github.com/user-attachments/assets/257d3dd4-b0d0-4318-8d62-d00a8942633b" /> ProkerMart
 
 **Digital Marketplace Ecosystem untuk Organisasi Mahasiswa**
 
