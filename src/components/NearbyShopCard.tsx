@@ -1,4 +1,5 @@
 import { Star, Clock, MapPin } from "lucide-react";
+import Image from "next/image";
 
 interface NearbyShopCardProps {
   id: string;
@@ -8,7 +9,7 @@ interface NearbyShopCardProps {
   reviewCount: string | number;
   distanceKm: number;
   travelTimeMin: number;
-  imageUrl: string;
+  imageUrl?: string | null;
   promoTag?: string;
 }
 
@@ -19,16 +20,26 @@ export function NearbyShopCard({
   reviewCount,
   distanceKm,
   travelTimeMin,
+  imageUrl,
   promoTag,
 }: NearbyShopCardProps) {
   return (
     <div className="flex bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm p-3 gap-4 mb-4">
       {/* Image Container */}
       <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-slate-200">
-        {/* Placeholder if no image optimization is set up properly */}
-        <div className="w-full h-full bg-slate-300 flex items-center justify-center text-slate-500">
-          <span className="text-xs">Image</span>
-        </div>
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full bg-slate-300 flex items-center justify-center text-slate-500">
+            <span className="text-xs">Image</span>
+          </div>
+        )}
         {promoTag && (
           <div className="absolute top-0 left-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-lg">
             {promoTag}

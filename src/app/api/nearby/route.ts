@@ -133,10 +133,9 @@ export async function GET(request: NextRequest) {
           reviewCount: reviewCount,
           distanceKm: parseFloat(distanceKm.toFixed(1)),
           travelTimeMin: Math.round(distanceKm * 15) || 5, // Estimasi 15 menit per km
-          imageUrl: shop.foto_sampul || "/placeholder.jpg",
+          imageUrl: shop.foto_sampul || null,
           lat: shop.latitude,
           lng: shop.longitude,
-
         };
       })
       .filter(Boolean)
