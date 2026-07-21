@@ -1,0 +1,9 @@
+allowBuilds:
+  core-js: true
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - postcss@8.5.21
+
+overrides:
+  postcss: 8.5.21
